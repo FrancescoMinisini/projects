@@ -1,5 +1,5 @@
 #include"libraries/definitions.h"
-#define BETA 0.99 
+#define BETA 0.5
 
 int main() {
     string directory = "data/history.csv"; 
