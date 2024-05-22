@@ -73,4 +73,44 @@ void print_data (stock* stocks, int n_stock , int& error_code){
     }
 }
 
+weighted_avg* initialize_weighted_avgs(stock* data, int n_dati, double beta) {
+    weighted_avg* weighted_avgs = (weighted_avg*)malloc(n_dati * sizeof(weighted_avg));
+    if (!weighted_avgs) {
+        perror("Failed to allocate memory for weighted averages");
+        exit(EXIT_FAILURE);
+    }
+    
+    weighted_avgs[0].value = data[0].open;  // Initial value should be the first data point
+    weighted_avgs[0].sigma = 0;  // Initial sigma is 0
+    
+    for (int i = 1; i < n_dati; ++i) {
+        weighted_avgs[i].value = beta * weighted_avgs[i - 1].value + (1 - beta) * data[i].open;
+        double log_return = log(weighted_avgs[i].value / weighted_avgs[i - 1].value);
+        weighted_avgs[i].sigma = sqrt(beta * pow(weighted_avgs[i - 1].sigma, 2) + (1 - beta) * pow(log_return, 2));
+    }
+    
+    return weighted_avgs;
+}
 
+void print_weighted_avgs (weighted_avg* weighted_avgs, int n_dati) {
+    for (int i = 0; i < n_dati; ++i) {
+        printf("Weighted Average %d: Value = %f, Sigma = %f\n", i, weighted_avgs[i].value, weighted_avgs[i].sigma);
+    }
+}
+
+
+void save_data_to_file(stock* data, weighted_avg* weighted_avgs, int n_dati, string filename) {
+    ofstream file(filename);
+
+    if (!file.is_open()) {
+        cout << "Failed to open file for writing" << endl;
+        return;
+    }
+
+    file << "Index,Stock Value,Weighted Average,Sigma\n";
+    for (int i = 0; i < n_dati; ++i) {
+        file << i << ',' << data[i].open << ',' << weighted_avgs[i].value << "," << weighted_avgs[i].sigma << '\n';
+    }
+
+    file.close();
+}

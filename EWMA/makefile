@@ -10,5 +10,8 @@ script/compiled/algorithm.o: script/algorithm.cpp
 script/compiled/algorithm.x: script/compiled/algorithm.o  script/compiled/functions.o
 	g++ script/algorithm.cpp script/compiled/functions.o -o script/compiled/algorithm.x
 
-run: script/compiled/algorithm.x data_download
+run: script/compiled/algorithm.x data_download 
 	./script/compiled/algorithm.x
+
+graph: script/graph.py run
+	python3 script/graph.py
