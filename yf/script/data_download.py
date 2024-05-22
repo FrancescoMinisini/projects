@@ -6,7 +6,8 @@ def print_stock_history(ticker_symbol, period='1y', interval='1d'):
     history = stock.history(period=period, interval=interval)
     
     # Stampa la history
-    file_name = f"{ticker_symbol}_history.csv"
+#    file_name = f"{ticker_symbol}_history.csv"
+    file_name = "data/history.csv"
     history.to_csv(file_name)
 #    print(f"History for {ticker_symbol}:")
 #    print(history)
