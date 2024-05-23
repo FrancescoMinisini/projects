@@ -1,5 +1,5 @@
 #include"libraries/definitions.h"
-#define BETA 0.5
+#define BETA 0.94
 
 int main() {
     string directory = "data/history.csv"; 
@@ -13,6 +13,7 @@ int main() {
     //print_weighted_avgs (average_values , n_stock );
     save_data_to_file(stocks , average_values ,  n_stock ,  filename);
     delete[] stocks;
+    delete[] average_values; 
     return 0;
 }
 
