@@ -1,17 +1,29 @@
-data_download: script/data_download.py
-	python3 script/data_download.py
 
-script/compiled/functions.o: script/libraries/functions.cpp script/libraries/definitions.h
-	g++ -c script/libraries/functions.cpp -o script/compiled/functions.o
+TARGET = script/compiled/algorithm.x
+FUNCTIONS_SRC = script/libraries/functions.cpp
+FUNCTIONS_OBJ = script/compiled/functions.o
+ALGORITHM_SRC = script/algorithm.cpp
+ALGORITHM_OBJ = script/compiled/algorithm.o
+DATA_DOWNLOAD_SCRIPT = script/data_download.py
+GRAPH_STOCK_SCRIPT = script/graph/graph_stock.py
+GRAPH_PORTFOLIO_SCRIPT = script/graph/graph_portfolio.py
 
-script/compiled/algorithm.o: script/algorithm.cpp 
-	g++ -c script/algorithm.cpp -o script/compiled/algorithm.o
+all: $(TARGET)
 
-script/compiled/algorithm.x: script/compiled/algorithm.o  script/compiled/functions.o
-	g++ script/algorithm.cpp script/compiled/functions.o -o script/compiled/algorithm.x
-
-run: script/compiled/algorithm.x data_download 
-	./script/compiled/algorithm.x
-
-graph: script/graph.py run
-	python3 script/graph.py
+data_download:
+	python3 $(DATA_DOWNLOAD_SCRIPT)
+$(FUNCTIONS_OBJ): $(FUNCTIONS_SRC) script/libraries/definitions.h
+	g++ -c $< -o $@
+$(ALGORITHM_OBJ): $(ALGORITHM_SRC)
+	g++ -c $< -o $@
+$(TARGET): $(ALGORITHM_OBJ) $(FUNCTIONS_OBJ)
+	g++ $^ -o $@
+run: $(TARGET) data_download
+	./$<
+graph_stock: run
+	python3 $(GRAPH_STOCK_SCRIPT)
+graph_portfolio: run 
+	python3 $(GRAPH_PORTFOLIO_SCRIPT)
+graph: run
+	python3 $(GRAPH_STOCK_SCRIPT)
+	python3 $(GRAPH_PORTFOLIO_SCRIPT)

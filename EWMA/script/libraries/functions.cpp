@@ -89,15 +89,13 @@ weighted_avg* initialize_weighted_avgs(stock* data, int n_dati, double beta) {
     return weighted_avgs;
 }
 
-
 void print_weighted_avgs (weighted_avg* weighted_avgs, int n_dati) {
     for (int i = 0; i < n_dati; ++i) {
         printf("Weighted Average %d: Value = %f, Sigma = %f\n", i, weighted_avgs[i].value, weighted_avgs[i].sigma);
     }
 }
 
-
-void save_data_to_file(stock* data, weighted_avg* weighted_avgs, int n_dati, string filename) {
+void save_data_to_file(stock* data, weighted_avg* weighted_avgs , portfolio asset, int n_dati, string filename) {
     ofstream file(filename);
 
     if (!file.is_open()) {
@@ -105,10 +103,49 @@ void save_data_to_file(stock* data, weighted_avg* weighted_avgs, int n_dati, str
         return;
     }
 
-    file << "Index,Stock Value,Weighted Average,Sigma\n";
+    file << "Index,Stock Value,Weighted Average,Sigma,Portfolio Value\n";
     for (int i = 0; i < n_dati; ++i) {
-        file << i << ',' << data[i].open << ',' << weighted_avgs[i].value << "," << weighted_avgs[i].sigma << '\n';
+        file << i << ',' << data[i].open << ',' << weighted_avgs[i].value << "," << weighted_avgs[i].sigma <<"," << asset.value[i]<< '\n';
     }
 
     file.close();
+}
+
+void simulate_portfolio(portfolio& asset, stock* stocks, weighted_avg* weighted_avgs, float s_index, float percent, int n_stock) {
+    double invested = 0;
+    double not_invested = asset.value[0];  // Initially, all the value is not invested
+    asset.n_stocks[0]= 0;
+    for (int i = 0; i < n_stock; i++) {
+        // Check for buy signal
+        if (weighted_avgs[i].value - s_index * weighted_avgs[i].sigma > stocks[i].open) {
+            double amount_to_invest = percent * not_invested;
+            double number_of_shares = amount_to_invest / stocks[i].open;
+
+            if (not_invested >= amount_to_invest) {
+                // Update portfolio for buy action
+                asset.n_stocks[i] = number_of_shares;
+                invested += amount_to_invest;
+                not_invested -= amount_to_invest;
+            } else {asset.n_stocks[i]= 0;}
+        }
+        // Check for sell signal
+        else if (weighted_avgs[i].value + s_index * weighted_avgs[i].sigma < stocks[i].open) {
+            double amount_to_divest = percent * invested;
+            double number_of_shares = amount_to_divest / stocks[i].open;
+
+            if (asset.n_stocks[i] >= number_of_shares) {
+                // Update portfolio for sell action
+                asset.n_stocks[i] = - number_of_shares;
+                invested -= amount_to_divest;
+                not_invested += amount_to_divest;
+            } else {asset.n_stocks[i]= 0;}
+        }
+
+        // Calculate the total value of the portfolio for this period
+        double total_shares = 0;
+        for (int j = 0; j <= i; j++) {
+            total_shares += asset.n_stocks[j] ;
+        }
+        asset.value[i] = not_invested + total_shares*stocks[i].open;
+    }
 }

@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Read the data from the CSV file
-data = pd.read_csv('data/output.csv')
+data = pd.read_csv('data/EWMA.csv')
 
 # Calculate the upper and lower bounds
 data['Upper Bound'] = data['Weighted Average'] + data['Sigma']
